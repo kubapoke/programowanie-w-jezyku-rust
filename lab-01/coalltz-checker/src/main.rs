@@ -22,9 +22,8 @@ fn check_coalltz(arr: [u64; 10]) -> [bool; 10]
 {
     let mut result = [false; 10];
 
-    let mut idx = 0;
-    for elem in arr {
-        let mut x: u64 = elem;
+    for elem in arr.iter().enumerate() {
+        let mut x: u64 = *elem.1;
 
         for i in 0..MAX_ITER {
             if x % 2 == 0 {
@@ -35,19 +34,31 @@ fn check_coalltz(arr: [u64; 10]) -> [bool; 10]
             }
 
             if x == 1 {
-                result[idx] = true;
+                result[elem.0] = true;
             }
         }
-
-        idx = idx + 1;
     }
 
     result
 }
 
+fn save_array_to_file(arr: [bool; 10]) -> () {
+    let mut file = File::create("xyz.txt").expect("Could not create file");
+
+    let mut content: [u8; 10] = [0; 10];
+    for elem in arr.iter().enumerate() {
+        content[elem.0] = match elem.1 {
+            true => 1,
+            false => 0,
+        }
+    }
+
+    file.write_all(&content).expect("Could not write to file");
+}
+
 fn main() {
     loop {
-        println!("Podaj liczbe");
+        println!("Podaj liczbę");
 
         let mut string = String::new();
 
@@ -65,19 +76,11 @@ fn main() {
         let rand = rand::thread_rng().gen_range(0..=5);
         x = x + rand;
 
-        println!("{} randomized, result is x = {}", rand, x);
+        println!("{} generated, result is x := {} + {} = {}", rand, x - rand, rand, x);
 
         let arr = get_power_array(x);
         let arr = check_coalltz(arr);
 
-        let mut file = File::create("xyz.txt").expect("Could not create file");
-
-        let mut content = String::new();
-        for elem in arr {
-            content.push_str(&elem.to_string());
-            content.push_str("\n");
-        }
-
-        todo!()
+        save_array_to_file(arr);
     };
 }
